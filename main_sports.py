@@ -44,11 +44,11 @@ parser.add_argument('--model', type=str, default='sru',
                     help='[sru, gru, lstm]: select your model')
 parser.add_argument('--nepochs', type=int, default=500,
                     help='sets max_iter, default: 500')
-parser.add_argument('--mu1', type=float, default=0.5,
+parser.add_argument('--mu1', type=float, default=0.3,
                     help='Bias for ridge regularization of all unregularized weights in the model, default: 1')
-parser.add_argument('--mu2', type=float, default=0.5,
+parser.add_argument('--mu2', type=float, default=0.3,
                     help='Bias for block sparse regularization of input layer weights, default: 1')
-parser.add_argument('--mu3', type=float, default=0.5,
+parser.add_argument('--mu3', type=float, default=0.3,
                     help='Bias for group sparse regularization of output feature layer weights in Economy SRU, default: 1')
 parser.add_argument('--lr', type=float, default=0.005,
                     help='sets learning rate, default: 0.005')
@@ -85,35 +85,7 @@ print("Computational Resource: %s" % (device))
 # Create input data in batch format 
 ######################################
 
-# if(dataset == 'gene'):
-#     Xtrain, Gref = getGeneTrainingData(dataset_id, device)
-#     n1 = Xtrain.shape[0]
-#     if(n != n1):
-#         print("Error::Dimension mismatch for input training data..")
-#     numTotalSamples = Xtrain.shape[1]
-#     Xtrain = Xtrain.float().to(device)
-#     # Make input signal zero mean and appropriately scaled
-#     Xtrain = Xtrain - Xtrain.mean()
-#     inputSignalMultiplier = 50
-#     Xtrain = inputSignalMultiplier * Xtrain
-#
-# elif(dataset == 'var'):
-#     fileName = "data/var/S_%s_T_%s_dataset_%s.npz" % (F, T, dataset_id)
-#     ld = np.load(fileName)
-#     X_np = ld['X_np']
-#     Gref = ld['Gref']
-#     numTotalSamples = T
-#     Xtrain = torch.from_numpy(X_np)
-#     Xtrain = Xtrain.float().to(device)
-#     inputSignalMultiplier = 1
-#     Xtrain = inputSignalMultiplier * Xtrain
-
-# elif(dataset == 'lorenz'):
-# fileName = "data/lorenz96/F_%s_T_%s_dataset_%s.npz" % (F, T, dataset_id)
 fileName = "/Users/shawnxys/Development/Data/preprocessed_causal_sports_data_by_games/17071/features_shots_rewards.csv"
-# ld = np.load(fileName)
-# X_np = ld['X_np']
-# Gref = ld['Gref']
 
 features_shots_rewards_df = pd.read_csv(fileName)
 # rename column name
@@ -142,21 +114,6 @@ Xtrain = torch.from_numpy(X_np)
 Xtrain = Xtrain.float().to(device)
 inputSignalMultiplier = 1
 Xtrain = inputSignalMultiplier * Xtrain
-
-# elif(dataset == 'netsim'):
-#     fileName = "data/netsim/sim3_subject_%s.npz" % (dataset_id)
-#     ld = np.load(fileName)
-#     X_np = ld['X_np']
-#     Gref = ld['Gref']
-#     numTotalSamples = T
-#     Xtrain = torch.from_numpy(X_np)
-#     Xtrain = Xtrain.float().to(device)
-#     inputSignalMultiplier = 1
-#     Xtrain = inputSignalMultiplier * Xtrain
-#
-# else:
-#     print("Dataset is not supported")
-
 
 if (verbose >= 1):
     plt.figure(1)
@@ -187,29 +144,6 @@ if (model_name == 'sru'):
     n_inp_channels = n
     n_out_channels = 1
 
-    # if(dataset == 'gene'):
-    #     A = [0.0, 0.01, 0.1, 0.5, 0.99]; #0.75
-    #     dim_iid_stats = 10 #math.ceil(n) #1.5n
-    #     dim_rec_stats = 10 #math.ceil(n) #1.5n
-    #     dim_final_stats = 10 #d * len(A) #math.ceil(n/2)
-    #     dim_rec_stats_feedback = 10 #d * len(A)
-    #     batchSize = 21
-    #     blk_size = batchSize
-    #     numBatches = int(numTotalSamples/batchSize)
-    #
-    #
-    # elif(dataset == 'var'):
-    #     A = [0.0, 0.01, 0.1, 0.99];
-    #     dim_iid_stats = 10 #math.ceil(n) #1.5n
-    #     dim_rec_stats = 10 #math.ceil(n) #1.5n
-    #     dim_final_stats = 10 #d * len(A) #math.ceil(n/2) #n
-    #     dim_rec_stats_feedback = 10 #d * len(A) #math.ceil(n/2) #n
-    #     batchSize = 250
-    #     blk_size = int(batchSize/2)
-    #     numBatches = int(numTotalSamples/batchSize)
-    #
-    #
-    # elif(dataset == 'lorenz'):
     A = [0.0, 0.01, 0.1, 0.99];
     dim_iid_stats = 10
     dim_rec_stats = 10
@@ -219,18 +153,7 @@ if (model_name == 'sru'):
     blk_size = int(batchSize / 2)
     numBatches = int(numTotalSamples / batchSize)
 
-    # elif(dataset == 'netsim'):
-    #     A = [0.0, 0.01, 0.05, 0.1, 0.99];
-    #     dim_iid_stats = 10
-    #     dim_rec_stats = 10
-    #     dim_final_stats = 10
-    #     dim_rec_stats_feedback = 10
-    #     batchSize = 10 #100
-    #     blk_size = int(batchSize/2)
-    #     numBatches = int(numTotalSamples/batchSize)
-    #
-    # else:
-    #     print("Unsupported dataset encountered")
+
 
 elif (model_name == 'eSRU_1LF' or model_name == 'eSRU_2LF'):
 
@@ -246,30 +169,6 @@ elif (model_name == 'eSRU_1LF' or model_name == 'eSRU_2LF'):
     n_inp_channels = n
     n_out_channels = 1
 
-    # if(dataset == 'gene'):
-    #     A = [0.05, 0.1, 0.2, 0.99];
-    #     dim_iid_stats = 10
-    #     dim_rec_stats = 10
-    #     dim_final_stats = 10
-    #     dim_rec_stats_feedback = 10
-    #     batchSize = 21
-    #     blk_size = int(batchSize)
-    #     numBatches = int(numTotalSamples/batchSize)
-    #
-    #
-    # elif(dataset == 'var'):
-    #     A = [0.0, 0.01, 0.1, 0.99];
-    #     dim_iid_stats = 10 #math.ceil(n) #1.5n
-    #     dim_rec_stats = 10 #math.ceil(n) #1.5n
-    #     dim_final_stats = 10 #d * len(A) #math.ceil(n/2) #n
-    #     dim_rec_stats_feedback = 10 #d * len(A) #math.ceil(n/2) #n
-    #     batchSize = 250
-    #     blk_size = int(batchSize/2)
-    #     numBatches = int(numTotalSamples/batchSize)
-    #
-    #
-    # elif(dataset == 'lorenz'):
-    # lr = 0.01
     A = [0.0, 0.01, 0.1, 0.99];
     dim_iid_stats = 10
     dim_rec_stats = 10
@@ -279,18 +178,6 @@ elif (model_name == 'eSRU_1LF' or model_name == 'eSRU_2LF'):
     blk_size = int(batchSize / 2)
     numBatches = int(numTotalSamples / batchSize)
 
-    # elif(dataset == 'netsim'):
-    #     A = [0.0, 0.01, 0.1, 0.99];
-    #     dim_iid_stats = 10
-    #     dim_rec_stats = 10
-    #     dim_final_stats = 10 #d*len(A)
-    #     dim_rec_stats_feedback = 10 #d*len(A)
-    #     batchSize = 10 #10 #100
-    #     blk_size = int(batchSize/2)
-    #     numBatches = int(numTotalSamples/batchSize)
-    #
-    # else:
-    #     print("Unsupported dataset encountered")
 
 else:
     print("Unsupported model encountered")
@@ -350,32 +237,6 @@ if 1:
 
     # print(Gref)
     print(Gest)
-
-    # if(jobLogFilename != ""):
-    #     if(model_name == 'eSRU_1LF' or model_name == 'eSRU_2LF'):
-    #         np.savez(jobLogFilename,
-    #                  Gref=None,
-    #                  Gest=Gest.detach().cpu().numpy(),
-    #                  model=model_name,
-    #                  dataset=None,
-    #                  dsid=None,
-    #                  T=T,
-    #                  F=F,
-    #                  nepochs=max_iter,
-    #                  mu1=mu1,
-    #                  mu2=mu2,
-    #                  mu3=mu3,
-    #                  lr=lr,
-    #                  batchSize=batchSize,
-    #                  blk_size=blk_size,
-    #                  numBatches=numBatches,
-    #                  dim_iid_stats=dim_iid_stats,
-    #                  dim_rec_stats=dim_rec_stats,
-    #                  dim_final_stats=dim_final_stats,
-    #                  dim_rec_stats_feedback=dim_rec_stats_feedback)
-    #
-    #     else:
-    #         np.savez(jobLogFilename, Gref=None, Gest=Gest.detach().cpu().numpy(), model=model_name, dataset=None, dsid=None, T=T, F=F, nepochs=max_iter, mu1=mu1, mu2=mu2, lr=lr)
 
 # sleep for one seconds followed by printing
 # the exit key for tmux consumption
