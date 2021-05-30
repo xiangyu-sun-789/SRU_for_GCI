@@ -18,12 +18,6 @@ def save_adjacency_matrix_in_csv(file_name, adjacency_matrix, variable_names):
 
 
 def draw_DAGs_using_LINGAM(file_name, adjacency_matrix, variable_names):
-    # direction of the adjacency matrix needs to be transposed.
-    # in LINGAM, the adjacency matrix is defined as column variable -> row variable
-    # in NOTEARS, the W is defined as row variable -> column variable
-
-    # the default value here was 0.01. Instead of not drawing edges smaller than 0.01, we eliminate edges
-    # smaller than `w_threshold` from the estimated graph so that we can set the value here to 0.
     lower_limit = 0.0
 
     dot = make_dot(np.transpose(adjacency_matrix), labels=variable_names, lower_limit=lower_limit)
