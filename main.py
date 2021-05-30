@@ -16,8 +16,10 @@ from matplotlib import pyplot as plt
 import time
 import sys
 from models.sru import SRU, trainSRU
-from models.eSRU_1LF import eSRU_1LF, train_eSRU_1LF
-from models.eSRU_2LF import eSRU_2LF, train_eSRU_2LF
+from models.esru_1LF import eSRU_1LF, train_eSRU_1LF
+from models.esru_2LF import eSRU_2LF, train_eSRU_2LF
+
+from util import *
 from utils.utilFuncs import env_config, loadTrainingData, loadTrueNetwork, getCausalNodes, count_parameters, getGeneTrainingData  
 
 
@@ -352,6 +354,11 @@ time.sleep(1)
 print("#RUN_COMPLETE #RUN_COMPLETE #RUN_COMPLETE #RUN_COMPLETE")
 
 
+variable_names = ['x_' + str(i) for i in range(args.n)]
+print(variable_names)
 
+csv_file_name = jobLogFilename + '.DAG.csv'
 
+save_adjacency_matrix_in_csv(csv_file_name, Gest, variable_names)
 
+draw_DAGs_using_LINGAM(csv_file_name, Gest, variable_names)
